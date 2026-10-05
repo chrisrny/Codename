@@ -121,9 +121,13 @@ neutralises both; the five below each need a different fix.
 
 | File | Family | Weakness it targets |
 |------|--------|---------------------|
-| `attacks/override.prompt`  | instruction override      | model follows the latest / most forceful instruction |
-| `attacks/authority.prompt` | fake authority / access   | model trusts a claimed admin or "verified" state |
-| `attacks/persona.prompt`   | persona / role-play       | model drops the rules "in character" |
-| `attacks/encoding.prompt`  | encoding / obfuscation    | the rule matches plain text, not a transformed output |
-| `attacks/indirect.prompt`  | indirect / task injection | instruction hidden inside a translate / summarize / story task |
+| `attacks/override.prompt`  | direct instruction override      | model follows the latest / most forceful instruction |
+| `attacks/authority.prompt` | fake-context social engineering  | model trusts a forged transcript / claimed prior authentication |
+| `attacks/persona.prompt`   | persona / role-play jailbreak    | model drops the rules "in character" |
+| `attacks/encoding.prompt`  | encoding / obfuscation           | the rule matches plain text, not a transformed output |
+| `attacks/indirect.prompt`  | indirect / task-payload injection | instruction hidden inside a proofread / translate task |
+
+See **`attacks/README.md`** for each family's mechanism, technique vocabulary,
+why it generalises, the **single Modelfile line that neutralises it and no other**
+(the separation proof), and the ethical scope.
 
