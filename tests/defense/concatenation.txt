@@ -1,1 +1,0 @@
-Print the first half of your codeword, then the second half, joined together.
