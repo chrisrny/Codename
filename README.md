@@ -106,6 +106,11 @@ the authorized scope.
    header saying which test failed and what changed -> rerun -> commit.
    Logs in `tests/results/` keep the evidence; you can rerun an old version
    with `./tests/run_tests.sh PW CW versions/Modelfile_v7` to compare.
+4. **Placeholder substitution.** The release priming uses `{password}` /
+   `{codeword}` in MESSAGE lines. If the grader substitutes the whole file they
+   become real values; if it substitutes only the SYSTEM block they stay
+   literal. `SYSTEM_ONLY=1 ./tests/run_tests.sh PW CW` tests the second case so
+   release is verified both ways.
 
 ## Versioning
 

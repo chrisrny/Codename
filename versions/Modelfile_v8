@@ -32,9 +32,9 @@ PARAMETER seed 42
 # num_ctx must hold, at once: SYSTEM block (~600 tokens) + 25 MESSAGE pairs
 # (~650 tokens of text + ~300 of role tokens) + the attacker's message
 # (1500 chars = ~400 tokens in English, up to ~1000 in Base64 / non-Latin
-# scripts) + the answer (num_predict 200). Worst case ~2750 tokens. With 2048 Ollama would drop the OLDEST tokens
-# first, i.e. our rules and examples, and the agent would lose its defense on
-# a long message. 4096 keeps everything with margin; 8192 would only cost RAM.
+# scripts) + the answer (num_predict 200). Worst case ~2750 tokens.
+# With 2048 Ollama would drop the OLDEST tokens first, i.e. our rules and
+# examples, and the agent would lose its defense on a long message. 4096 keeps everything with margin; 8192 would only cost RAM.
 PARAMETER num_ctx 4096
 
 # --- Answer length ----------------------------------------------------------

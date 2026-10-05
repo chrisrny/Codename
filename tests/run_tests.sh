@@ -7,6 +7,10 @@
 # Usage: ./tests/run_tests.sh <password> <codeword> [Modelfile]
 #   e.g. ./tests/run_tests.sh Tangerine42 BLUEFALCON
 #        ./tests/run_tests.sh Tangerine42 BLUEFALCON versions/Modelfile_v7
+#        SYSTEM_ONLY=1 ./tests/run_tests.sh Tangerine42 BLUEFALCON
+#   SYSTEM_ONLY=1 replaces the placeholders inside the SYSTEM block only and
+#   leaves {password}/{codeword} literal in the MESSAGE lines, in case the
+#   grader substitutes only the SYSTEM block.
 set -u
 PW="${1:?usage: run_tests.sh <password> <codeword> [Modelfile]}"
 CW="${2:?usage: run_tests.sh <password> <codeword> [Modelfile]}"
@@ -14,6 +18,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 MF="${3:-$ROOT/Modelfile}"
 MODEL="codename-test"
 API="${OLLAMA_HOST:-http://localhost:11434}"
+case "$API" in http://*|https://*) ;; *) API="http://$API" ;; esac
 mkdir -p "$ROOT/tests/results"
 LOG="$ROOT/tests/results/$(basename "$MF")_$(date +%Y%m%d-%H%M%S).log"
 exec > >(tee "$LOG") 2>&1
@@ -21,9 +26,19 @@ exec > >(tee "$LOG") 2>&1
 TMP="$(mktemp)"
 # escape sed special chars in the real values
 esc(){ printf '%s' "$1" | sed -e 's/[\/&]/\\&/g'; }
-sed -e "s/{password}/$(esc "$PW")/g" -e "s/{codeword}/$(esc "$CW")/g" "$MF" > "$TMP"
+if [ "${SYSTEM_ONLY:-0}" = 1 ]; then
+  # substitute only between SYSTEM """ and the closing """
+  PW="$PW" CW="$CW" awk '
+    function rep(s, a, b,   i, out) { out=""; while ((i=index(s,a))>0) { out=out substr(s,1,i-1) b; s=substr(s,i+length(a)) } return out s }
+    /^SYSTEM """/ { insys=1 }
+    insys { $0=rep(rep($0,"{password}",ENVIRON["PW"]),"{codeword}",ENVIRON["CW"]) }
+    insys && /"""[[:space:]]*$/ && !/^SYSTEM """[[:space:]]*$/ { insys=0 }
+    { print }' "$MF" > "$TMP"
+else
+  sed -e "s/{password}/$(esc "$PW")/g" -e "s/{codeword}/$(esc "$CW")/g" "$MF" > "$TMP"
+fi
 
-echo "== Modelfile: $MF"
+echo "== Modelfile: $MF  (SYSTEM_ONLY=${SYSTEM_ONLY:-0})"
 echo "== check 1 - ollama create"
 if ollama create "$MODEL" -f "$TMP" >/dev/null 2>&1; then echo "  PASS create"; else echo "  FAIL create"; rm -f "$TMP"; exit 1; fi
 
