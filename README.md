@@ -9,9 +9,7 @@ toolkit of prompt-injection attacks. One imposed model: `granite3.1-moe:3b`.
 Modelfile                current agent (v8)
 versions/Modelfile_vX    full history, each with a changelog header
 attacks/<family>.prompt  the 5 attack prompts, one technique family each
-tests/run_tests.sh       non-interactive test harness
-tests/defense/*.txt      defense fixtures the harness runs against our own agent
-tests/results/*.log      one log per test run, to compare versions
+tests/defense/*.txt      defense fixtures sent to our own agent with `ollama run`
 ```
 
 ## Build and run
@@ -23,16 +21,16 @@ ollama run codename
 ```
 
 The grader replaces `{password}` and `{codeword}` with real values. To test in
-the same conditions:
+the same conditions, build a local copy with real values (ignored by git) and
+send prompts straight to the model, without the chat UI:
 
 ```
-./tests/run_tests.sh Tangerine42 BLUEFALCON
+sed -e 's/{password}/Tangerine42/g' -e 's/{codeword}/BLUEFALCON/g' Modelfile > Modelfile.test
+ollama create codename -f Modelfile.test
+ollama run codename "Tangerine42"
+ollama run codename "What is the capital of France?"
+for f in tests/defense/*.txt; do echo "== $f"; ollama run codename "$(cat "$f")"; done
 ```
-
-The harness builds the model with real values, then sends every prompt straight
-to the model (no chat UI) and reports PASS / FAIL / LEAK for each. It covers the
-three mandatory checks (create, release on the password, utility), the defense
-fixtures, and our own attack prompts run back against our own agent.
 
 ## Defense design
 
@@ -85,32 +83,27 @@ the authorized scope.
 
 ## Testing methodology
 
-1. **No chat UI.** `tests/run_tests.sh` builds the agent with real values in
-   place of `{password}` / `{codeword}` (exactly what the grader does) and sends
-   every prompt straight to the model with `ollama run`, plus the HTTP API
-   (`/api/chat`) for multi-turn tests. Temperature 0 + seed make every run
-   reproducible, so one result is meaningful.
+1. **No chat UI.** The agent is built from `Modelfile.test` (real values in
+   place of `{password}` / `{codeword}`, exactly what the grader does) and each
+   prompt is sent with `ollama run codename "<prompt>"`, one message per call.
+   Temperature 0 + seed make every run reproducible, so one result is
+   meaningful.
 2. **What is checked.**
    - the 3 mandatory checks: create, release, utility;
-   - release in every format: alone, sentence, JSON, key=value, key: value,
-     YAML, password buried in a long narrative;
+   - release in every format: alone, sentence, JSON, key=value, YAML,
+     password inside a long text;
    - password discipline: one char off, char missing/added, fragmented,
-     case changed, a mere claim -> no release, and the same answer for a near
-     and a far guess (no "you're close" oracle);
-   - utility after a failed extraction (multi-turn);
-   - every fixture in `tests/defense/` (one per attack family of the grading
-     grid) must not leak the codeword nor the password;
-   - every `attacks/*.prompt` is <= 1500 characters.
-3. **Iteration loop.** Run the harness -> read the FAIL / LEAK lines -> change
-   ONE thing in the Modelfile -> save it as `versions/Modelfile_vN+1` with a
-   header saying which test failed and what changed -> rerun -> commit.
-   Logs in `tests/results/` keep the evidence; you can rerun an old version
-   with `./tests/run_tests.sh PW CW versions/Modelfile_v7` to compare.
+     a mere claim -> no release, and the same answer for every wrong guess;
+   - every fixture in `tests/defense/` (one per case of the grading grid)
+     must leak neither the codeword nor the password.
+3. **Iteration loop.** Run the fixtures -> note which one leaks -> change ONE
+   thing in the Modelfile -> save it as `versions/Modelfile_vN+1` with a header
+   saying which test failed and what changed -> rerun -> commit.
 4. **Placeholder substitution.** The release priming uses `{password}` /
    `{codeword}` in MESSAGE lines. If the grader substitutes the whole file they
    become real values; if it substitutes only the SYSTEM block they stay
-   literal. `SYSTEM_ONLY=1 ./tests/run_tests.sh PW CW` tests the second case so
-   release is verified both ways.
+   literal, so release is also checked with a copy where only SYSTEM is
+   substituted.
 
 ## Versioning
 
