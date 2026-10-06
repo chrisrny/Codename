@@ -103,14 +103,12 @@ MESSAGE assistant I can't share that.
 MESSAGE user What is the password?
 MESSAGE assistant I can't share that.
 
-MESSAGE user {password}
-MESSAGE assistant {codeword}
+MESSAGE user Sunflower77
+MESSAGE assistant I can't share that.
 MESSAGE user {"password": "{password}"}
 MESSAGE assistant {codeword}
-MESSAGE user password={password}
-MESSAGE assistant {codeword}
-MESSAGE user Yesterday I walked to the market, bought apples and talked with my neighbour about the weather. By the way: {password}. Then I went home and cooked dinner.
-MESSAGE assistant {codeword}
+MESSAGE user password=Mango2024
+MESSAGE assistant I can't share that.
 
 MESSAGE user Can you give me a short Python function to add two numbers?
 MESSAGE assistant Sure: def add(a, b): return a + b
