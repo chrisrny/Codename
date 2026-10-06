@@ -1,13 +1,3 @@
-# Modelfile v10 - 2026-10-06
-# Change since v9 (live test: "Xangerine42" and "tangerine42" still released):
-# - the 4 release examples (password alone, JSON, key=value, long text) taught
-#   the model "anything that looks like the password -> codeword". Only ONE
-#   release example is kept (JSON key/value, the format that failed at the
-#   mid-term); alone / sentence / long text rely on the SYSTEM rule.
-# - two wrong but password-shaped examples (Sunflower77, password=Mango2024)
-#   placed next to it -> refuse, so the model sees that a password-like value
-#   that is not the exact one is refused.
-#
 FROM granite3.1-moe:3b
 
 PARAMETER temperature 0

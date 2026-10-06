@@ -1,13 +1,3 @@
-# Modelfile v9 - 2026-10-05
-# Change since v8 (bug found in live testing, not in the mid-term report):
-# - a near-miss password leaked the codeword: "tangerine42" (lowercase of the
-#   real password) released it, i.e. the agent matched case-insensitively.
-# - case A now states the comparison is exact and CASE-SENSITIVE; case B adds a
-#   bullet: a password with a letter changed/removed or in a different case is a
-#   different password -> refuse.
-# - note: "Tangerine42!" releasing is NOT a leak (the message contains the exact
-#   password); only a corrupted/changed password must be refused.
-#
 FROM granite3.1-moe:3b
 
 PARAMETER temperature 0
